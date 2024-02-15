@@ -14,15 +14,8 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install FTP client
-      run: sudo apt-get update && sudo apt-get install -y ftp
+      run: sudo apt-get update && sudo apt-get install -y lftp
 
     - name: Deploy PHP app to cPanel Shared Hosting
       run: |
-        echo "open ${{ secrets.CPANEL_HOST }}" > ~/.netrc
-        echo "user ${{ secrets.CPANEL_USERNAME }} ${{ secrets.CPANEL_PASSWORD }}" >> ~/.netrc
-        echo "cd public_html" >> ~/.netrc
-        echo "put -r ./*" >> ~/.netrc
-        echo "bye" >> ~/.netrc
-        ftp -inv <<EOF
-        source ~/.netrc
-        EOF
+        lftp -c "open -u ${{ secrets.CPANEL_USERNAME }},$${{ secrets.CPANEL_PASSWORD }} -e 'mirror -R ./ /public_html; bye;' ${{ secrets.CPANEL_HOST }}"
