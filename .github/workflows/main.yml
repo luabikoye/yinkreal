@@ -1,0 +1,28 @@
+name: Deploy PHP App to cPanel Shared Hosting
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install FTP client
+      run: sudo apt-get update && sudo apt-get install -y ftp
+
+    - name: Deploy PHP app to cPanel Shared Hosting
+      run: |
+        echo "open ${{ secrets.CPANEL_HOST }}" > ~/.netrc
+        echo "user ${{ secrets.CPANEL_USERNAME }} ${{ secrets.CPANEL_PASSWORD }}" >> ~/.netrc
+        echo "cd public_html" >> ~/.netrc
+        echo "put -r ./*" >> ~/.netrc
+        echo "bye" >> ~/.netrc
+        ftp -inv <<EOF
+        source ~/.netrc
+        EOF
